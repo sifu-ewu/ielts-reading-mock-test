@@ -23,6 +23,10 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
   const [visitedQuestions, setVisitedQuestions] = useState<Set<number>>(new Set([0]));
   const [showPassage, setShowPassage] = useState(true);
 
+  useEffect(() => {
+    setVisitedQuestions(prev => new Set([...prev, currentQuestionIndex]));
+  }, [currentQuestionIndex]);
+
   if (!testSession) {
     return (
       <div className="text-center py-12">
@@ -69,10 +73,6 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
   const getAnsweredQuestionsCount = () => {
     return Object.keys(testSession.answers).length;
   };
-
-  useEffect(() => {
-    setVisitedQuestions(prev => new Set([...prev, currentQuestionIndex]));
-  }, [currentQuestionIndex]);
 
   return (
     <div className="flex flex-col space-y-6 lg:grid lg:grid-cols-12 lg:gap-6 lg:space-y-0 h-full">

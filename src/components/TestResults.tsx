@@ -5,9 +5,10 @@ import { getBandDescription, getDetailedBandDescription, calculatePercentage } f
 
 interface TestResultsProps {
   testSession: TestSession | null;
+  onBackToDashboard?: () => void;
 }
 
-const TestResults: React.FC<TestResultsProps> = ({ testSession }) => {
+const TestResults: React.FC<TestResultsProps> = ({ testSession, onBackToDashboard }) => {
   if (!testSession) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -257,9 +258,17 @@ const TestResults: React.FC<TestResultsProps> = ({ testSession }) => {
 
         {/* Action Buttons */}
         <div className="text-center mt-6 space-x-4">
+          {onBackToDashboard && (
+            <button 
+              onClick={onBackToDashboard}
+              className="btn-primary"
+            >
+              Back to Dashboard
+            </button>
+          )}
           <button 
             onClick={() => window.location.reload()}
-            className="btn-primary"
+            className="btn-secondary"
           >
             Take Another Test
           </button>

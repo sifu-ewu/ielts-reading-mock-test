@@ -59,16 +59,26 @@ export interface UserAnswer {
 }
 
 export interface TestResult {
-  sessionId: string;
+  sessionId?: string;
   userId?: string;
   totalQuestions: number;
-  correctAnswers: number;
+  correctAnswers?: number;
   score: number; // out of 40 for IELTS
-  bandScore: number; // 1-9 band score
-  timeSpent: number; // in minutes
+  band: number; // 1-9 band score
+  bandScore?: number; // deprecated, use band
+  timeTaken?: number; // in seconds
+  timeSpent?: number; // deprecated, in minutes
   answers: UserAnswer[];
-  completedAt: Date;
-  feedback: TestFeedback;
+  completedAt?: Date;
+  feedback?: TestFeedback;
+  recommendations?: string[];
+  detailedResults?: {
+    [questionType: string]: {
+      attempted: number;
+      correct: number;
+      accuracy: number;
+    };
+  };
 }
 
 export interface TestFeedback {

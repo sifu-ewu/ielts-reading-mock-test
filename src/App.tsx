@@ -1,23 +1,37 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Clock, BookOpen, CheckCircle, AlertCircle } from 'lucide-react';
 import type { UIState } from './types/ielts';
 import TestInterface from './components/TestInterface.tsx';
 import TestResults from './components/TestResults.tsx';
 import TestInstructions from './components/TestInstructions.tsx';
+import { LoginForm } from './components/Auth/LoginForm.tsx';
+import { SignupForm } from './components/Auth/SignupForm.tsx';
+import { UserDashboard } from './components/Dashboard/UserDashboard.tsx';
+import { PracticeInterface } from './components/PracticeMode/PracticeInterface.tsx';
 import { useTimer } from './hooks/useTimer.ts';
 import { useTestSession } from './hooks/useTestSession.ts';
+import { useTestHistory } from './hooks/useTestHistory.ts';
+import { useAuth } from './contexts/AuthContext.tsx';
+import { practiceTests } from './data/mockTestData.ts';
 import './App.css';
 
+type AppView = 'auth' | 'dashboard' | 'instructions' | 'test' | 'practice' | 'results';
+
 function App() {
-  const [uiState, setUIState] = useState<UIState>({
+  const [currentView, setCurrentView] = useState<AppView>('auth');
+  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+  const [practiceDifficulty, setPracticeDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
+  const [uiState] = useState<UIState>({
     isLoading: false,
     error: null,
-    showInstructions: true,
+    showInstructions: false,
     showResults: false,
     highlightedText: null,
     fontSize: 'medium'
   });
 
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { addTestResult } = useTestHistory();
   const { 
     testSession, 
     startTest, 
@@ -29,26 +43,88 @@ function App() {
     timeRemaining, 
     isRunning, 
     startTimer, 
-    pauseTimer
+    pauseTimer,
+    resetTimer
   } = useTimer(3600); // 60 minutes
 
-  const handleStartTest = () => {
-    setUIState(prev => ({ ...prev, showInstructions: false }));
-    startTest();
-    startTimer();
+  const [testStartTime, setTestStartTime] = useState<Date | null>(null);
+
+  useEffect(() => {
+    if (!authLoading) {
+      if (isAuthenticated) {
+        setCurrentView('dashboard');
+      } else {
+        setCurrentView('auth');
+      }
+    }
+  }, [isAuthenticated, authLoading]);
+
+  const handleStartFullTest = () => {
+    setCurrentView('instructions');
   };
 
-  const handleCompleteTest = () => {
-    completeTest();
-    setUIState(prev => ({ ...prev, showResults: true }));
+  const handleStartPractice = (difficulty: 'easy' | 'medium' | 'hard') => {
+    setPracticeDifficulty(difficulty);
+    setCurrentView('practice');
+  };
+
+  const handleBeginTest = () => {
+    setCurrentView('test');
+    startTest();
+    startTimer();
+    setTestStartTime(new Date());
+  };
+
+  const handleCompleteTest = useCallback(() => {
+    const testResult = completeTest();
+    
+    if (testResult && testStartTime) {
+      const duration = Math.floor((new Date().getTime() - testStartTime.getTime()) / 1000);
+      
+      addTestResult({
+        testDate: testStartTime,
+        testType: 'full',
+        difficulty: 'mixed',
+        result: testResult,
+        duration,
+        questionsAnswered: Object.keys(testSession?.answers || {}).length,
+        totalQuestions: testSession?.questions.length || 0
+      });
+    }
+    
+    resetTimer();
+    setCurrentView('results');
+  }, [completeTest, testStartTime, addTestResult, testSession, resetTimer]);
+
+  const handlePracticeComplete = (score: number, totalQuestions: number) => {
+    
+    addTestResult({
+      testDate: new Date(),
+      testType: 'practice',
+      difficulty: practiceDifficulty,
+      result: {
+        score,
+        totalQuestions,
+        band: (score / totalQuestions) * 9, // Simple band calculation for practice
+        timeTaken: 0,
+        answers: [],
+        recommendations: [],
+        detailedResults: {}
+      },
+      duration: 0,
+      questionsAnswered: score,
+      totalQuestions
+    });
+
+    setCurrentView('dashboard');
   };
 
   // Auto-submit when time runs out
   useEffect(() => {
-    if (timeRemaining === 0 && isRunning) {
+    if (timeRemaining === 0 && isRunning && currentView === 'test') {
       handleCompleteTest();
     }
-  }, [timeRemaining, isRunning]);
+  }, [timeRemaining, isRunning, currentView, handleCompleteTest]);
 
   const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
@@ -57,14 +133,104 @@ function App() {
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  if (uiState.showInstructions) {
-    return <TestInstructions onStartTest={handleStartTest} />;
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
   }
 
-  if (uiState.showResults) {
-    return <TestResults testSession={testSession} />;
+  // Authentication View
+  if (currentView === 'auth') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <div className="bg-white rounded-xl shadow-xl max-w-md w-full">
+          {authMode === 'login' ? (
+            <LoginForm
+              onSuccess={() => setCurrentView('dashboard')}
+              onSwitchToSignup={() => setAuthMode('signup')}
+            />
+          ) : (
+            <SignupForm
+              onSuccess={() => setCurrentView('dashboard')}
+              onSwitchToLogin={() => setAuthMode('login')}
+            />
+          )}
+        </div>
+      </div>
+    );
   }
 
+  // Dashboard View
+  if (currentView === 'dashboard') {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <header className="bg-white shadow-sm border-b border-gray-200">
+          <div className="container mx-auto px-4 py-4" style={{maxWidth: '1024px'}}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <BookOpen className="h-8 w-8 text-blue-600" />
+                <h1 className="text-2xl font-bold text-gray-900">IELTS Reading Practice</h1>
+              </div>
+              <button
+                onClick={() => {
+                  setCurrentView('auth');
+                  setAuthMode('login');
+                }}
+                className="text-gray-600 hover:text-gray-900"
+              >
+                Sign Out
+              </button>
+            </div>
+          </div>
+        </header>
+        
+        <main className="container mx-auto px-4 py-8" style={{maxWidth: '1024px'}}>
+          <UserDashboard
+            onStartTest={handleStartFullTest}
+            onStartPractice={handleStartPractice}
+          />
+        </main>
+      </div>
+    );
+  }
+
+  // Practice Mode View
+  if (currentView === 'practice') {
+    const practiceData = practiceTests[practiceDifficulty];
+    return (
+      <PracticeInterface
+        passages={practiceData.passages}
+        questions={practiceData.questions}
+        difficulty={practiceDifficulty}
+        onComplete={handlePracticeComplete}
+        onExit={() => setCurrentView('dashboard')}
+      />
+    );
+  }
+
+  // Test Instructions View
+  if (currentView === 'instructions') {
+    return <TestInstructions onStartTest={handleBeginTest} />;
+  }
+
+  // Test Results View
+  if (currentView === 'results') {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <TestResults 
+          testSession={testSession} 
+          onBackToDashboard={() => setCurrentView('dashboard')}
+        />
+      </div>
+    );
+  }
+
+  // Main Test View
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}

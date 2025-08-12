@@ -82,8 +82,10 @@ export const useTestSession = () => {
       totalQuestions: testSession.questions.length,
       correctAnswers,
       score,
-      bandScore,
-      timeSpent,
+      band: bandScore,
+      bandScore, // deprecated
+      timeTaken: timeSpent * 60, // convert to seconds
+      timeSpent, // deprecated
       answers: userAnswers,
       completedAt: endTime,
       feedback: {
@@ -92,7 +94,9 @@ export const useTestSession = () => {
         weaknesses: getWeaknesses(userAnswers),
         recommendations: getRecommendations(bandScore),
         detailedResults: getDetailedResults(userAnswers, testSession.questions)
-      }
+      },
+      recommendations: getRecommendations(bandScore),
+      detailedResults: getDetailedResults(userAnswers, testSession.questions)
     };
 
     setTestResult(result);
@@ -106,6 +110,8 @@ export const useTestSession = () => {
         isCompleted: true
       };
     });
+
+    return result;
   }, [testSession]);
 
   return {
@@ -182,8 +188,14 @@ function getRecommendations(bandScore: number): string[] {
   return recommendations;
 }
 
-function getDetailedResults(answers: UserAnswer[], questions: Question[]): Record<string, any> {
-  const results: Record<string, any> = {};
+interface QuestionTypeResult {
+  attempted: number;
+  correct: number;
+  accuracy: number;
+}
+
+function getDetailedResults(answers: UserAnswer[], questions: Question[]): Record<string, QuestionTypeResult> {
+  const results: Record<string, QuestionTypeResult> = {};
   
   // Group by question type
   const questionTypes = questions.reduce((acc, q) => {
