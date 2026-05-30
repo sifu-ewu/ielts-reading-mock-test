@@ -32,6 +32,12 @@ const TestResults: React.FC<TestResultsProps> = ({ testSession, testResult, onRe
     );
   }
 
+  const handlePrint = () => {
+    // Show every question (not just the active filter) before printing.
+    setFilter('all');
+    setTimeout(() => window.print(), 60);
+  };
+
   const { bandScore, correctAnswers, totalQuestions, timeSpent, feedback, answers } = testResult;
   const answeredCount = answers.filter((a) => a.answer !== '' && !(Array.isArray(a.answer) && a.answer.length === 0)).length;
   const percentage = calculatePercentage(correctAnswers, totalQuestions);
@@ -240,7 +246,7 @@ const TestResults: React.FC<TestResultsProps> = ({ testSession, testResult, onRe
         {/* Actions */}
         <div className="text-center mt-6 space-x-4 no-print">
           <button onClick={onRetake} className="btn-primary">Take Another Test</button>
-          <button onClick={() => window.print()} className="btn-secondary">Print Results</button>
+          <button onClick={handlePrint} className="btn-secondary">Print Results</button>
         </div>
       </div>
     </div>

@@ -95,4 +95,8 @@
   .no-print {
     display: none !important;
   }
+  /* Force collapsed <details> explanations open so the printed review is complete */
+  details > *:not(summary) {
+    display: block !important;
+  }
 }

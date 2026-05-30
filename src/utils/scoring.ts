@@ -152,13 +152,21 @@ export function buildFeedback(
 
 // --- Display helpers (unchanged behaviour) ---------------------------------
 
+// Lowest raw score that reaches each target band, derived from the live
+// conversion table so it can never drift from calculateBandScore.
 export function getScoreRequirements(testType: 'academic' | 'general') {
+  const minScoreForBand = (target: number): number => {
+    for (let s = 0; s <= 40; s++) {
+      if (calculateBandScore(s, testType) >= target) return s;
+    }
+    return 40;
+  };
   return {
-    band9: testType === 'academic' ? 39 : 40,
-    band8: testType === 'academic' ? 36 : 38,
-    band7: testType === 'academic' ? 32 : 34,
-    band6: testType === 'academic' ? 28 : 30,
-    band5: testType === 'academic' ? 24 : 25,
+    band9: minScoreForBand(9),
+    band8: minScoreForBand(8),
+    band7: minScoreForBand(7),
+    band6: minScoreForBand(6),
+    band5: minScoreForBand(5),
   };
 }
 

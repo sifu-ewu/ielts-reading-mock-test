@@ -138,7 +138,7 @@ const TestInterface: React.FC<TestInterfaceProps> = ({
 
         {/* Center Panel - Questions */}
         <div
-          className={`${showPassage ? 'lg:col-span-4' : 'lg:col-span-6'} bg-white rounded-lg shadow-sm border border-gray-200`}
+          className={`${showPassage ? 'lg:col-span-4' : 'lg:col-span-7'} bg-white rounded-lg shadow-sm border border-gray-200`}
         >
           <div className="border-b border-gray-200 p-4">
             <div className="flex items-center justify-between">

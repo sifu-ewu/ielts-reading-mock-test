@@ -85,13 +85,15 @@ function App() {
     setUIState((prev) => ({ ...prev, fontSize }));
   };
 
-  // Auto-submit when time runs out.
+  // Auto-submit when time runs out. We must NOT gate on `isRunning`: the timer
+  // sets isRunning=false in the same batched update that sets timeRemaining=0,
+  // so there is never a commit where both are true. Gate on the screen instead.
   useEffect(() => {
-    if (timeRemaining === 0 && isRunning) {
+    if (timeRemaining === 0 && !uiState.showInstructions && !uiState.showResults) {
       handleCompleteTest();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timeRemaining, isRunning]);
+  }, [timeRemaining, uiState.showInstructions, uiState.showResults]);
 
   const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);

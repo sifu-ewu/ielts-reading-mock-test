@@ -115,23 +115,8 @@ export interface UIState {
   fontSize: 'small' | 'medium' | 'large';
 }
 
-// Band Score Calculation
-export const BAND_SCORE_MAPPING = {
-  academic: {
-    39: 9.0, 38: 8.5, 37: 8.5, 36: 8.0, 35: 8.0,
-    34: 7.5, 33: 7.5, 32: 7.0, 31: 7.0, 30: 6.5,
-    29: 6.5, 28: 6.0, 27: 6.0, 26: 5.5, 25: 5.5,
-    24: 5.0, 23: 5.0, 22: 4.5, 21: 4.5, 20: 4.0,
-    19: 4.0, 18: 3.5, 17: 3.5, 16: 3.0, 15: 3.0
-  },
-  general: {
-    40: 9.0, 39: 8.5, 38: 8.0, 37: 8.0, 36: 7.5,
-    35: 7.5, 34: 7.0, 33: 7.0, 32: 6.5, 31: 6.5,
-    30: 6.0, 29: 6.0, 28: 5.5, 27: 5.5, 26: 5.0,
-    25: 5.0, 24: 4.5, 23: 4.5, 22: 4.0, 21: 4.0,
-    20: 3.5, 19: 3.5, 18: 3.0, 17: 3.0, 16: 2.5
-  }
-};
+// Note: IELTS band-score conversion lives in src/utils/scoring.ts
+// (calculateBandScore) as the single source of truth.
 
 export const QUESTION_TIME_LIMITS = {
   'multiple-choice': 90, // seconds

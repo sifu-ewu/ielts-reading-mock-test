@@ -12,21 +12,42 @@ const PassageDisplay: React.FC<PassageDisplayProps> = ({ passage, fontSize, high
   const fontClass =
     fontSize === 'small' ? 'text-sm' : fontSize === 'large' ? 'text-lg' : 'text-base';
 
-  // Wrap the current selection in <mark> when highlighting is on.
+  // Wrap the current selection in <mark> when highlighting is on. We wrap each
+  // intersected text node separately so selections that span paragraphs, cross a
+  // label, or overlap an existing highlight still work (surroundContents on a
+  // whole range throws when it only partially contains an element).
   const handleMouseUp = () => {
     if (!highlightEnabled) return;
     const sel = window.getSelection();
-    if (!sel || sel.isCollapsed || !ref.current) return;
+    if (!sel || sel.isCollapsed || sel.rangeCount === 0 || !ref.current) return;
+    const root = ref.current;
     const range = sel.getRangeAt(0);
-    if (!ref.current.contains(range.commonAncestorContainer)) return;
-    try {
+    if (!root.contains(range.commonAncestorContainer)) return;
+
+    const textNodes: Text[] = [];
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    while (walker.nextNode()) {
+      const node = walker.currentNode as Text;
+      if (range.intersectsNode(node)) textNodes.push(node);
+    }
+
+    for (const node of textNodes) {
+      const r = document.createRange();
+      r.selectNodeContents(node);
+      if (node === range.startContainer) r.setStart(node, range.startOffset);
+      if (node === range.endContainer) r.setEnd(node, range.endOffset);
+      if (r.collapsed) continue;
+      // Skip text that is already inside a highlight.
+      if ((node.parentElement?.tagName ?? '') === 'MARK') continue;
       const mark = document.createElement('mark');
       mark.className = 'highlight';
-      range.surroundContents(mark);
-      sel.removeAllRanges();
-    } catch {
-      // Selection spans element boundaries — ignore.
+      try {
+        r.surroundContents(mark);
+      } catch {
+        // Single text node should never throw, but stay defensive.
+      }
     }
+    sel.removeAllRanges();
   };
 
   // Click a highlight to remove it.
