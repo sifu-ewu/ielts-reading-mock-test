@@ -18,10 +18,15 @@ export interface Question {
   questionNumber: number;
   instruction: string;
   question: string;
-  options?: string[]; // For multiple choice
+  options?: string[];                 // tokens (matching) or full texts (multiple choice)
   correctAnswer: string | string[];
+  acceptableAnswers?: string[];       // extra accepted variants for text answers
+  wordLimit?: number;                 // e.g. 2 or 3 for completion/short-answer
   points: number;
   explanation?: string;
+  groupId?: string;                   // questions sharing a group
+  groupInstruction?: string;          // shown above the question
+  groupContent?: string;              // shared block: heading bank / summary / table
 }
 
 export type QuestionType = 
