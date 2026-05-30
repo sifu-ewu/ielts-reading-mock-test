@@ -54,3 +54,45 @@
   border-color: #9ca3af;
   background: #f9fafb;
 }
+
+/* Layout container */
+.test-container {
+  max-width: 1024px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+/* Passage text */
+.passage-text p {
+  margin-bottom: 1rem;
+}
+
+/* Text answer inputs and dropdowns */
+.answer-input {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #fff;
+  color: #111827;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.answer-input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* Passage highlighter */
+.highlight {
+  background: #fde68a;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+/* Hide controls when printing the results */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}

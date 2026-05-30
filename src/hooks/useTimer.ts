@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { loadSession, updateSession } from '../utils/storage';
 
 export interface TimerState {
   timeRemaining: number;
@@ -8,7 +9,11 @@ export interface TimerState {
 }
 
 export const useTimer = (initialTime: number) => {
-  const [timeRemaining, setTimeRemaining] = useState(initialTime);
+  // Seed from a saved, unfinished session so a refresh resumes mid-clock.
+  const [timeRemaining, setTimeRemaining] = useState(() => {
+    const saved = loadSession();
+    return saved && !saved.isCompleted ? saved.timeRemaining : initialTime;
+  });
   const [isRunning, setIsRunning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
@@ -16,10 +21,8 @@ export const useTimer = (initialTime: number) => {
   const startTimer = useCallback(() => {
     setIsRunning(true);
     setIsPaused(false);
-    if (!hasStarted) {
-      setHasStarted(true);
-    }
-  }, [hasStarted]);
+    setHasStarted(true);
+  }, []);
 
   const pauseTimer = useCallback(() => {
     setIsRunning(false);
@@ -37,26 +40,18 @@ export const useTimer = (initialTime: number) => {
     setIsRunning(false);
     setIsPaused(false);
   }, []);
+
   useEffect(() => {
-    let intervalId: NodeJS.Timeout;
-
-    if (isRunning && timeRemaining > 0) {
-      intervalId = setInterval(() => {
-        setTimeRemaining((prev) => {
-          if (prev <= 1) {
-            setIsRunning(false);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-    };
+    if (!isRunning || timeRemaining <= 0) return;
+    const id = setInterval(() => {
+      setTimeRemaining((prev) => {
+        const next = prev <= 1 ? 0 : prev - 1;
+        updateSession({ timeRemaining: next });
+        if (next === 0) setIsRunning(false);
+        return next;
+      });
+    }, 1000);
+    return () => clearInterval(id);
   }, [isRunning, timeRemaining]);
 
   return {
@@ -64,9 +59,10 @@ export const useTimer = (initialTime: number) => {
     isRunning,
     isPaused,
     hasStarted,
+    setTimeRemaining,
     startTimer,
     pauseTimer,
     resetTimer,
-    stopTimer
+    stopTimer,
   };
 };
