@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# Local smoke-test scratch artifacts
+smoke-*.html
+smoke-*.png
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
