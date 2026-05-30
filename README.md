@@ -1,184 +1,75 @@
-# IELTS Reading Mock Test System
+# IELTS Reading Mock Test
 
-A comprehensive IELTS Reading Mock Test System built with React, TypeScript, and Vite. This system provides an authentic IELTS reading test experience with interactive interface, real-time timer, multiple question types, and automatic scoring.
+A complete, authentic-format IELTS **Academic Reading** mock test built with React, TypeScript and Vite. It delivers a full 60-minute test — 3 passages, 40 questions across 9 IELTS question types — with automatic band scoring, a detailed per-question review, and progress that survives a page refresh.
 
-## 🚀 Features
+## ✨ Features
 
-### Core Features
-- **Interactive Test Interface**: Clean, distraction-free test-taking environment
-- **60-Minute Timer**: Real-time countdown with auto-submit functionality
-- **Multiple Question Types**: Support for all IELTS reading question formats:
-  - Multiple Choice
-  - True/False/Not Given
-  - Matching Headings
-  - Gap Filling (Fill in the blanks)
-  - Short Answer Questions
-  - Matching Information
+- **Authentic test** — 3 original academic passages and 40 questions:
+  Matching Headings, True/False/Not Given, Summary Completion, Multiple Choice,
+  Matching Information, Short Answer, Yes/No/Not Given, Matching Features, and
+  Note/Table Completion.
+- **60-minute timer** with auto-submit, pause/resume, and a low-time warning.
+- **Resume after refresh** — answers, flags, navigation, and the remaining time are
+  saved to `localStorage`; reopening the test offers **Resume** or **Start over**.
+- **Accurate scoring** — every answer is normalised (case/whitespace, accepted variants)
+  and converted to an IELTS band (1–9) using a proper raw-score conversion table.
+- **Full review** — for each question see your answer, the correct answer, and an
+  explanation; filter by All / Incorrect / Unanswered, with a per-question-type accuracy
+  breakdown. Print-friendly.
+- **Reading aids** — adjustable font size (A− / A / A+) and a passage highlighter
+  (select to highlight; click a highlight to remove it).
+- **Tested logic** — Vitest unit tests cover answer-checking, band-score conversion,
+  result assembly, persistence, and verify that every authored question is winnable.
 
-### Test Management
-- **Progress Tracking**: Visual progress indicators and question navigation
-- **Question Flagging**: Mark questions for review
-- **Answer Persistence**: Answers are saved as you type
-- **Automatic Scoring**: IELTS band calculation based on official scoring criteria
-- **Detailed Results**: Performance analysis with recommendations
+## 🛠️ Tech Stack
 
-### User Experience
-- **Responsive Design**: Works on desktop and mobile devices
-- **Accessibility**: Semantic HTML and keyboard navigation support
-- **Modern UI**: Clean, professional interface suitable for test environment
-- **Font Loading**: Inter font family for optimal readability
-
-## 🛠️ Technology Stack
-
-- **Frontend**: React 18 with TypeScript
-- **Build Tool**: Vite
-- **Styling**: Tailwind CSS with custom IELTS theme
-- **Icons**: Lucide React
-- **State Management**: React Hooks (useState, useEffect, custom hooks)
-- **Timer**: Custom useTimer hook with countdown functionality
-- **Scoring**: Custom IELTS band calculation algorithms
+React 19 · TypeScript 5.8 (strict) · Vite 6 · Tailwind CSS v4 · lucide-react · Vitest + jsdom
 
 ## 📁 Project Structure
 
 ```
 src/
-├── components/           # React components
-│   ├── TestInterface.tsx     # Main test interface
-│   ├── PassageDisplay.tsx    # Reading passage viewer
-│   ├── QuestionComponent.tsx # Dynamic question renderer
-│   ├── NavigationPanel.tsx   # Question navigation grid
-│   ├── TestInstructions.tsx  # Pre-test instructions
-│   └── TestResults.tsx       # Results and scoring display
-├── hooks/               # Custom React hooks
-│   ├── useTimer.ts          # Timer functionality
-│   └── useTestSession.ts    # Test state management
-├── types/               # TypeScript type definitions
-│   └── ielts.ts            # IELTS-specific types
-├── utils/               # Utility functions
-│   └── scoring.ts          # IELTS scoring algorithms
-├── data/                # Mock data
-│   └── mockTestData.ts     # Sample reading passages and questions
-└── assets/              # Static assets
+├── components/        # TestInstructions, TestInterface, PassageDisplay,
+│                      # QuestionComponent, NavigationPanel, TestResults
+├── hooks/             # useTestSession (state + persistence + result), useTimer
+├── utils/             # scoring.ts (answer check, band score, result), storage.ts
+├── types/             # ielts.ts — shared interfaces
+└── data/              # mockTestData.ts — passages + 40 questions
+docs/superpowers/      # design spec and implementation plan
 ```
 
-## 🏃‍♂️ Getting Started
+## 🏃 Getting Started
 
-### Prerequisites
-- Node.js (v18 or higher)
-- npm or yarn
-
-### Installation
-
-1. Clone the repository:
 ```bash
-git clone <repository-url>
-cd mock
+npm install      # install dependencies
+npm run dev      # start the dev server (http://localhost:5173)
 ```
 
-2. Install dependencies:
-```bash
-npm install
-```
+### Scripts
 
-3. Start the development server:
-```bash
-npm run dev
-```
+- `npm run dev` — start the development server
+- `npm run build` — type-check and build for production
+- `npm run preview` — preview the production build
+- `npm run lint` — run ESLint
+- `npm run test` — run the unit tests (Vitest)
 
-4. Open your browser and navigate to `http://localhost:5173`
+## 🎯 Taking a Test
 
-### Available Scripts
+1. **Start** from the instructions screen (or **Resume** a saved test).
+2. **Read** each passage — it sits beside its questions; minimise it for more room.
+3. **Answer** by selecting or typing; answers save automatically as you go.
+4. **Navigate & flag** with the per-passage question grid.
+5. **Submit** manually or let the timer auto-submit at 00:00.
+6. **Review** your band score, accuracy by question type, and every question with the
+   correct answer and an explanation.
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
+## 🧩 Customising the Test
 
-## 🎯 Usage
-
-### Taking a Test
-
-1. **Start**: Click "Start Test" from the instructions screen
-2. **Navigate**: Use the question navigation panel to move between questions
-3. **Answer**: Select or type answers based on question type
-4. **Flag**: Mark questions for review using the flag button
-5. **Submit**: Test auto-submits when timer expires, or submit manually
-6. **Results**: View detailed scoring and performance analysis
-
-### Question Types
-
-#### Multiple Choice
-- Select one correct answer from multiple options
-- Radio button interface for single selection
-
-#### True/False/Not Given
-- Determine if statements are True, False, or Not Given based on the passage
-- Three-option selection for each statement
-
-#### Matching Headings
-- Match paragraph headings to sections of the text
-- Dropdown selection interface
-
-#### Gap Filling
-- Fill in missing words or phrases in sentences
-- Text input fields with character limits
-
-#### Short Answer Questions
-- Provide brief answers to specific questions
-- Text input with word/character limits
-
-#### Matching Information
-- Match information to specific paragraphs or sections
-- Dropdown selection interface
-
-## 🎨 Customization
-
-### Theme Colors
-The system uses a custom IELTS color palette defined in `tailwind.config.js`:
-- Primary: Blue (#1e40af)
-- Secondary: Dark gray (#374151)
-- Accent: Green (#059669)
-- Warning: Yellow (#d97706)
-- Error: Red (#dc2626)
-
-### Adding New Test Data
-Edit `src/data/mockTestData.ts` to add new reading passages and questions. Follow the existing structure for consistency.
-
-### Modifying Scoring
-Update `src/utils/scoring.ts` to adjust band calculation algorithms or add new scoring criteria.
-
-## 🧪 Testing
-
-The system includes comprehensive TypeScript type checking and can be extended with unit tests. The current mock data includes:
-- 2 academic reading passages
-- 8 questions across different question types
-- Realistic IELTS content and difficulty
-
-## 📚 IELTS Standards Compliance
-
-This system follows official IELTS Reading test standards:
-- 60-minute time limit
-- Academic reading passage difficulty
-- Official question types and formats
-- Standard band scoring (1-9 scale)
-- Authentic test-taking experience
-
-## 🤝 Contributing
-
-1. Follow the coding guidelines in `.github/copilot-instructions.md`
-2. Use TypeScript for all new components
-3. Implement proper error handling and loading states
-4. Follow IELTS test format standards
-5. Maintain responsive design principles
+- **Content:** edit `src/data/mockTestData.ts`. The data-integrity test
+  (`src/data/mockTestData.test.ts`) enforces that every choice answer is a valid option
+  and every completion answer appears in its passage — run `npm run test` after editing.
+- **Scoring:** adjust the conversion tables in `src/utils/scoring.ts`.
 
 ## 📄 License
 
-This project is licensed under the MIT License.
-
-## 🆘 Support
-
-For issues or questions:
-1. Check the VS Code tasks for common operations
-2. Review TypeScript types in `src/types/ielts.ts`
-3. Examine component implementations for usage examples
-4. Test with the provided mock data
+MIT
